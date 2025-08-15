@@ -137,6 +137,23 @@ local function stopEscort()
     DetachEntity(PlayerPedId(), true, false)
 end
 
+local function hardResetRestraints()
+    -- Stop escort if any
+    if escortTick then
+        escortTick = nil
+        DetachEntity(PlayerPedId(), true, false)
+    end
+    -- Uncuff if cuffed
+    if isCuffed and DoesEntityExist(cuffProp) then
+        DetachEntity(cuffProp, true, true)
+        DeleteEntity(cuffProp)
+    end
+    isCuffed = false
+    ClearPedTasksImmediately(PlayerPedId())
+    SetEnableHandcuffs(PlayerPedId(), false)
+    SetPedCanPlayGestureAnims(PlayerPedId(), true)
+end
+
 -- Events from server
 RegisterNetEvent('rcuffs:client:doCuff', function(officerServerId)
     cuffLocalPlayer()
@@ -158,6 +175,8 @@ RegisterNetEvent('rcuffs:client:officerAnim', function()
     ensureAnim(a.dict)
     TaskPlayAnim(PlayerPedId(), a.dict, a.anim, 4.0, -2.0, 3000, 49, 0.0, false, false, false)
 end)
+
+
 
 -- === Target options (ox_target) ===
 local function registerOxTarget()
@@ -222,6 +241,35 @@ local function registerOxTarget()
             end
         }
     })
+end
+
+-- If using baseevents (recommended)
+AddEventHandler('baseevents:onPlayerDied', function(killerType, deathCoords)
+    hardResetRestraints()
+end)
+
+AddEventHandler('baseevents:onPlayerKilled', function(killerId, deathCoords)
+    hardResetRestraints()
+end)
+
+-- Failsafe: tick watcher (works even without baseevents)
+CreateThread(function()
+    while true do
+        if isCuffed or escortTick then
+            local ped = PlayerPedId()
+            if IsPedFatallyInjured(ped) or IsPedDeadOrDying(ped) then
+                hardResetRestraints()
+            end
+        end
+        Wait(500)
+    end
+end)
+
+-- In startEscort() tick loop (inside while escortTick do)
+if not DoesEntityExist(officerPed) or IsPedDeadOrDying(officerPed) or IsPedFatallyInjured(officerPed) then
+    escortTick = nil
+    DetachEntity(suspect, true, false)
+    break
 end
 
 -- Optional failsafe keybind
