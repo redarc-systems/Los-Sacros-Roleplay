@@ -125,3 +125,114 @@ local function startEscort(officerPed)
             if not DoesEntityExist(officerPed) or IsPedDeadOrDying(officerPed) then
                 escortTick = nil
                 DetachEntity(suspect, true, false)
+                break
+            end
+        end
+    end)
+end
+
+local function stopEscort()
+    if not escortTick then return end
+    escortTick = nil
+    DetachEntity(PlayerPedId(), true, false)
+end
+
+-- Events from server
+RegisterNetEvent('rcuffs:client:doCuff', function(officerServerId)
+    cuffLocalPlayer()
+end)
+
+RegisterNetEvent('rcuffs:client:doUncuff', function()
+    uncuffLocalPlayer()
+end)
+
+RegisterNetEvent('rcuffs:client:escort', function(officerServerId, officerSrc, start)
+    local ply = GetPlayerFromServerId(officerSrc)
+    if ply == -1 then return end
+    local officerPed = GetPlayerPed(ply)
+    if start then startEscort(officerPed) else stopEscort() end
+end)
+
+RegisterNetEvent('rcuffs:client:officerAnim', function()
+    local a = Config.Anims.officer
+    ensureAnim(a.dict)
+    TaskPlayAnim(PlayerPedId(), a.dict, a.anim, 4.0, -2.0, 3000, 49, 0.0, false, false, false)
+end)
+
+-- === Target options (ox_target) ===
+local function registerOxTarget()
+    if Config.Target ~= 'ox_target' then return end
+    exports.ox_target:addGlobalPlayer({
+        {
+            icon = 'handcuffs',
+            label = 'Cuff / Uncuff',
+            distance = Config.TargetDistance,
+            onSelect = function(data)
+                local targetPed = data.entity
+                local targetId = GetPlayerServerId(NetworkGetPlayerIndexFromPed(targetPed))
+                if not targetId then return end
+                lib.registerContext({
+                    id = 'rcuffs_menu',
+                    title = 'Restraint',
+                    options = {
+                        {
+                            title = 'Cuff',
+                            onSelect = function()
+                                TriggerServerEvent('rcuffs:tryCuff', targetId)
+                            end
+                        },
+                        {
+                            title = 'Uncuff',
+                            onSelect = function()
+                                TriggerServerEvent('rcuffs:tryUncuff', targetId)
+                            end
+                        }
+                    }
+                })
+                lib.showContext('rcuffs_menu')
+            end
+        },
+        {
+            icon = 'person-walking',
+            label = 'Hold / Escort',
+            distance = Config.TargetDistance,
+            onSelect = function(data)
+                local targetPed = data.entity
+                local targetId = GetPlayerServerId(NetworkGetPlayerIndexFromPed(targetPed))
+                if not targetId then return end
+                lib.registerContext({
+                    id = 'rcuffs_escort',
+                    title = 'Escort',
+                    options = {
+                        {
+                            title = 'Start Escort',
+                            onSelect = function()
+                                TriggerServerEvent('rcuffs:tryEscort', targetId, true)
+                            end
+                        },
+                        {
+                            title = 'Stop Escort',
+                            onSelect = function()
+                                TriggerServerEvent('rcuffs:tryEscort', targetId, false)
+                            end
+                        }
+                    }
+                })
+                lib.showContext('rcuffs_escort')
+            end
+        }
+    })
+end
+
+-- Optional failsafe keybind
+RegisterCommand('rcuffs_stopescort', function() stopEscort() end, false)
+RegisterKeyMapping('rcuffs_stopescort', 'RCuffs: Stop Escort', 'keyboard', Config.Keys.stopEscort or 'X')
+
+CreateThread(function()
+    registerOxTarget()
+end)
+
+-- Exports if you use a different target system
+exports('CuffPlayer',   function(serverId) TriggerServerEvent('rcuffs:tryCuff', serverId) end)
+exports('UncuffPlayer', function(serverId) TriggerServerEvent('rcuffs:tryUncuff', serverId) end)
+exports('Escort',       function(serverId, start) TriggerServerEvent('rcuffs:tryEscort', serverId, start) end)
