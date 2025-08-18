@@ -1,0 +1,83 @@
+:root {
+  --bg: rgba(8, 10, 14, 0.78);
+  --fg: #e9eef3;
+  --muted: #9aa7b1;
+  --accent: #ff4949;
+  --green: #69db7c;
+  --gap: 8px;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+body {
+  margin: 0;
+  pointer-events: none; /* overlay only */
+}
+
+.hidden { display: none; }
+
+#panel {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  min-width: 270px;
+  max-width: 360px;
+  background: var(--bg);
+  backdrop-filter: blur(6px);
+  color: var(--fg);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+#panel.top-left { left: 24px; right: auto; }
+#panel.scale-100 { transform: scale(1); transform-origin: top right; }
+#panel.scale-090 { transform: scale(0.9); }
+#panel.scale-125 { transform: scale(1.25); }
+
+.row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.row.top { margin-bottom: 10px; }
+.row.bottom { margin-top: 8px; margin-bottom: 0; }
+
+.label { color: var(--muted); letter-spacing: 0.08em; font-size: 11px; }
+.value { font-weight: 700; letter-spacing: 0.02em; font-size: 14px; }
+
+.agency { font-weight: 700; letter-spacing: 0.12em; font-size: 12px; color: var(--fg); }
+.rec { display: flex; align-items: center; gap: 6px; }
+.rec .txt { font-weight: 800; letter-spacing: 0.1em; font-size: 12px; color: var(--fg); }
+.dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1s infinite;
+  box-shadow: 0 0 0 0 rgba(255,73,73,0.7);
+}
+@keyframes pulse {
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(255,73,73,0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(255,73,73,0.0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(255,73,73,0.0); }
+}
+
+.gps {
+  flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--muted); font-size: 12px;
+  padding-right: 10px;
+}
+
+.battery { display: flex; align-items: center; gap: 6px; }
+.batt-icon {
+  width: 28px; height: 14px; border-radius: 3px;
+  border: 2px solid #9aa7b1; position: relative; padding: 1px;
+}
+.batt-icon::after {
+  content: ''; position: absolute; right: -5px; top: 3px;
+  width: 3px; height: 6px; background: #9aa7b1; border-radius: 1px;
+}
+.batt-level {
+  height: 100%; width: 88%;
+  background: var(--green); border-radius: 1px;
+  transition: width 0.4s ease;
+}
+#batt-text { color: var(--muted); font-size: 12px; }
