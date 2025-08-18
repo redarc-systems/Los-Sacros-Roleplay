@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Bodycam</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="style.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="container" class="hidden">
+    <div id="panel" class="top-right scale-100">
+      <div class="row top">
+        <div class="agency" id="agency">AGENCY</div>
+        <div class="rec">
+          <span class="dot"></span>
+          <span class="txt">REC</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">OFFICER</div>
+        <div class="value" id="officer">Officer</div>
+      </div>
+      <div class="row">
+        <div class="label">UNIT</div>
+        <div class="value" id="callsign">P-101</div>
+      </div>
+
+      <div class="row">
+        <div class="label">DATE</div>
+        <div class="value" id="date">—</div>
+      </div>
+      <div class="row">
+        <div class="label">TIME</div>
+        <div class="value" id="time">—</div>
+      </div>
+
+      <div class="row bottom">
+        <div class="gps" id="gps">—</div>
+        <div class="battery" id="battery">
+          <div class="batt-icon">
+            <div class="batt-level" id="batt-level"></div>
+          </div>
+          <span id="batt-text">96%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sounds -->
+  <audio id="sfx-activate" src="sounds/activate.ogg" preload="auto"></audio>
+  <audio id="sfx-deactivate" src="" preload="auto"></audio>
+  <audio id="sfx-periodic" src="sounds/periodic.ogg" preload="auto"></audio>
+
+  <script src="app.js"></script>
+</body>
+</html>
